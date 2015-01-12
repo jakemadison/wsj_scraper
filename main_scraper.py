@@ -35,19 +35,24 @@ def main():
 
     # parse out init params:
     print('entered function main....')
-    symbol = sys.argv[1]
-    start_date = sys.argv[2]
-    end_date = sys.argv[3]
+
+    if len(sys.argv) == 4:
+        symbol = sys.argv[1]
+        start_date = sys.argv[2]
+        end_date = sys.argv[3]
+
+    else:
+        symbol = 'GIS'
+        start_date = '01/01/1970'
+        end_date = '01/01/1984'
 
     start_date = datetime.strptime(start_date, '%m/%d/%Y')
     end_date = datetime.strptime(end_date, '%m/%d/%Y')
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
-    for each_day in date_generator(start_date, end_date):
-        print(each_day)
-        time.sleep(1)
-
-
+    # for each_day in date_generator(start_date, end_date):
+    #     print(each_day)
+    #     time.sleep(1)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,7 @@
+# Created by .gitignore support plugin (hsz.mobi)
+
+#Ignore temp stuff
+*.py[cod]
+
+#Ignore IDE stuff
+.idea/

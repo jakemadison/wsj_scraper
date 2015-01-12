@@ -5,6 +5,19 @@ from datetime import datetime, timedelta
 import time
 
 
+def get_page(date):
+
+    base_url = ('http://custom.gtm.idmanagedsolutions.com/custom/wsjie/wsjbb-historical.asp'
+                '?symb=gis&close_date={0}&x=0&y=0')
+    base_url = base_url.format(date)
+
+    print('attempting to get page now: {0}'.format(base_url))
+
+
+
+
+
+
 def date_generator(start_date, end_date):
 
     """Simple Generator to keep getting the next day until end date.
@@ -12,7 +25,12 @@ def date_generator(start_date, end_date):
     """
 
     while True:
+
         if start_date <= end_date:
+            if start_date.weekday() > 4:  # skip weekends.
+                start_date += timedelta(1)
+                continue
+
             yield start_date.strftime('%m/%d/%Y')
             start_date += timedelta(1)
 
@@ -50,9 +68,10 @@ def main():
     end_date = datetime.strptime(end_date, '%m/%d/%Y')
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
-    # for each_day in date_generator(start_date, end_date):
-    #     print(each_day)
-    #     time.sleep(1)
+    for each_day in date_generator(start_date, end_date):
+        get_page(each_day)
+        # break
+        # time.sleep(1)
 
 
 if __name__ == '__main__':

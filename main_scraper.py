@@ -3,19 +3,40 @@ from bs4 import BeautifulSoup
 import sys
 from datetime import datetime, timedelta
 import time
+import requests
+
+
+failed_dates = []
+
+
+def parse_page_response(response):
+    pass
 
 
 def get_page(date):
+
+    """take in a date, create a link, get request to give us the html content"""
 
     base_url = ('http://custom.gtm.idmanagedsolutions.com/custom/wsjie/wsjbb-historical.asp'
                 '?symb=gis&close_date={0}&x=0&y=0')
     base_url = base_url.format(date)
 
+    headers = {
+        'User-Agent': 'Mozilla/5.0'
+    }
+
     print('attempting to get page now: {0}'.format(base_url))
 
+    try:
+        resp = requests.get(base_url, headers=headers, timeout=10)
+        resp.raise_for_status()  # <- no-op if status!=200
 
+    except Exception, e:
+        print('i died while requesting the link :<', e)
+        failed_dates.append(date)
+        return False
 
-
+    return resp
 
 
 def date_generator(start_date, end_date):
@@ -69,8 +90,9 @@ def main():
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
     for each_day in date_generator(start_date, end_date):
-        get_page(each_day)
-        # break
+        request_response = get_page(each_day)
+        print(request_response)
+        break
         # time.sleep(1)
 
 

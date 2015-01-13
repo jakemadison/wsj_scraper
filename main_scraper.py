@@ -4,13 +4,30 @@ import sys
 from datetime import datetime, timedelta
 import time
 import requests
+import pickle
 
 
 failed_dates = []
 
 
-def parse_page_response(response):
-    pass
+# Temp Functions to test response content with:
+def pickle_content(content):
+    with open('./temp_parsed_page.data', 'wb') as pickle_file:
+        pickle.dump(content, pickle_file)
+
+    return True
+
+
+def get_pickled_content():
+    with open('./temp_parsed_page.data', 'r') as pickle_file:
+        file_contents = pickle.load(pickle_file)
+
+    return file_contents
+
+
+def parse_page_response(response=get_pickled_content()):
+    print(response)
+    return True
 
 
 def get_page(date):
@@ -90,11 +107,13 @@ def main():
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
     for each_day in date_generator(start_date, end_date):
-        request_response = get_page(each_day)
-        print(request_response)
+        # request_response = get_page(each_day)
+        # pickle_content(request_response)
+        parse_page_response()
         break
         # time.sleep(1)
 
 
 if __name__ == '__main__':
     main()
+    print('........ done!')

@@ -25,6 +25,17 @@ def get_pickled_content():
     return file_contents
 
 
+def get_main_price(parsed_page):
+
+    font_array = parsed_page.findAll('font', {"color": "000000", "size": '2'})
+    try:
+        main_price = float(font_array[1].get_text().strip())
+    except Exception, e:
+        main_price = None
+
+    return main_price
+
+
 def get_basic_prices(parsed_page):
 
     basic_prices = {}
@@ -65,14 +76,12 @@ def get_basic_prices(parsed_page):
         if i == 4:  # get price data
             try:
                 price = float(each.find('b').get_text().strip())
-                basic_prices['price'] = price
+                basic_prices['split_adjusted_price'] = price
             except Exception, e:
-                basic_prices['price'] = None
+                basic_prices['split_adjusted_price'] = None
                 continue
 
     return basic_prices
-
-
 
 
 def parse_page_response(response):
@@ -81,9 +90,12 @@ def parse_page_response(response):
 
     basic_prices = get_basic_prices(parsed_page)
 
-    print('\n\n basic prices: {0}'.format(basic_prices))
+    if len(basic_prices) == 0:  # bad day
+        return False
 
-    return True
+    basic_prices['main_price'] = get_main_price(parsed_page)
+    print('basic prices: {0}'.format(basic_prices))
+    return basic_prices
 
 
 def get_page(date):
@@ -132,6 +144,12 @@ def date_generator(start_date, end_date):
             raise StopIteration
 
 
+def add_to_outfile(data):
+    with open('outfile.csv', 'a') as out_file:
+        out_file.write('{5}, {0}, {1}, {2}, {3}, {4}\n'.format(data['main_price'], data['split_adjusted_price'],
+                                                               data['high'], data['low'], data['volume'], data['date']))
+
+
 def main():
 
     """
@@ -162,32 +180,33 @@ def main():
     end_date = datetime.strptime(end_date, '%m/%d/%Y')
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
-    responses = get_pickled_content()
+    # responses = get_pickled_content()
 
-    for i, each_response in enumerate(responses):
-        if i == 0:
+    # for i, each_response in enumerate(responses):
+    #     # if i != 0:
+    #     #     continue
+    #     price_data = parse_page_response(each_response)
+    #
+    #     if price_data:
+    #         add_to_outfile(price_data)
+
+    for i, each_day in enumerate(date_generator(start_date, end_date)):
+
+        print('processing call number: {0}, for date: {1}'.format(i, each_day))
+
+        try:
+            request_response = get_page(each_day)
+            price_data = parse_page_response(request_response)
+
+            if price_data:
+                price_data['date'] = each_day
+                add_to_outfile(price_data)
+
+        except Exception, e:
+            print('i died.... continuing {0}'.format(e))
             continue
-        parse_page_response(each_response)
 
-
-
-
-
-
-    # responses = []
-
-    # for i, each_day in enumerate(date_generator(start_date, end_date)):
-    #     print('processing call number: {0}'.format(i))
-        # request_response = get_page(each_day)
-        # responses.append(request_response)
-        # time.sleep(1)
-
-        # parse_page_response()
-
-        # if i == 10:
-            # pickle_content(responses)
-            # break
-        # time.sleep(1)
+        time.sleep(1)
 
 
 if __name__ == '__main__':

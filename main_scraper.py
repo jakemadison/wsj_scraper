@@ -25,8 +25,64 @@ def get_pickled_content():
     return file_contents
 
 
-def parse_page_response(response=get_pickled_content()):
-    print(response)
+def get_basic_prices(parsed_page):
+
+    basic_prices = {}
+
+    # get the price:
+    font_array = parsed_page.findAll('font', {"color": "000000", "size": '1'})
+
+    for i, each in enumerate(font_array):
+        if i == 0:
+            continue
+        if i == 5:
+            break
+
+        if i == 1:  # get high data
+            try:
+                high = float(each.get_text().strip())
+                basic_prices['high'] = high
+            except Exception, e:
+                basic_prices['high'] = None
+                continue
+
+        if i == 2:  # get low data
+            try:
+                low = float(each.get_text().strip())
+                basic_prices['low'] = low
+            except Exception, e:
+                basic_prices['low'] = None
+                continue
+
+        if i == 3:  # get vol data
+            try:
+                volume = int(each.get_text().strip().replace(',', ''))
+                basic_prices['volume'] = volume
+            except Exception, e:
+                basic_prices['volume'] = None
+                continue
+
+        if i == 4:  # get price data
+            try:
+                price = float(each.find('b').get_text().strip())
+                basic_prices['price'] = price
+            except Exception, e:
+                basic_prices['price'] = None
+                continue
+
+    return basic_prices
+
+
+
+
+def parse_page_response(response):
+
+    parsed_page = BeautifulSoup(response.content, from_encoding=response.encoding)
+
+    basic_prices = get_basic_prices(parsed_page)
+
+    print('\n\n basic prices: {0}'.format(basic_prices))
+
     return True
 
 
@@ -99,18 +155,38 @@ def main():
 
     else:
         symbol = 'GIS'
-        start_date = '01/01/1970'
+        start_date = '01/02/1970'
         end_date = '01/01/1984'
 
     start_date = datetime.strptime(start_date, '%m/%d/%Y')
     end_date = datetime.strptime(end_date, '%m/%d/%Y')
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
-    for each_day in date_generator(start_date, end_date):
+    responses = get_pickled_content()
+
+    for i, each_response in enumerate(responses):
+        if i == 0:
+            continue
+        parse_page_response(each_response)
+
+
+
+
+
+
+    # responses = []
+
+    # for i, each_day in enumerate(date_generator(start_date, end_date)):
+    #     print('processing call number: {0}'.format(i))
         # request_response = get_page(each_day)
-        # pickle_content(request_response)
-        parse_page_response()
-        break
+        # responses.append(request_response)
+        # time.sleep(1)
+
+        # parse_page_response()
+
+        # if i == 10:
+            # pickle_content(responses)
+            # break
         # time.sleep(1)
 
 

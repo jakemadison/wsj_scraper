@@ -1,0 +1,1 @@
+A basic BS4/Requests scraper to get historical stock data from the Wall St. Journal and push it to a csv.

@@ -178,6 +178,7 @@ def main():
 
     start_date = datetime.strptime(start_date, '%m/%d/%Y')
     end_date = datetime.strptime(end_date, '%m/%d/%Y')
+
     print('received the following symbol: {0}, start: {1}, end: {2}'.format(symbol, start_date, end_date))
 
     # responses = get_pickled_content()
